@@ -1,0 +1,691 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Admin and bot operations for the Telegram refer-and-reward service
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+  - name: dashboard
+  - name: settings
+  - name: content
+  - name: channels
+  - name: milestones
+  - name: rewards
+  - name: users
+  - name: broadcasts
+  - name: audit
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /admin/dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Get dashboard metrics and recent activity
+      responses:
+        "200":
+          description: Dashboard
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+  /admin/settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get bot settings
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotSettings"
+    patch:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Update bot settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SettingsUpdate"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotSettings"
+  /admin/content:
+    get:
+      operationId: getContent
+      tags: [content]
+      summary: Get editable bot content
+      responses:
+        "200":
+          description: Content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotContent"
+    patch:
+      operationId: updateContent
+      tags: [content]
+      summary: Update editable bot content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentUpdate"
+      responses:
+        "200":
+          description: Updated content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotContent"
+  /admin/channels:
+    get:
+      operationId: listChannels
+      tags: [channels]
+      summary: List force subscribe channels
+      responses:
+        "200":
+          description: Channels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ForceChannel"
+    post:
+      operationId: createChannel
+      tags: [channels]
+      summary: Add a force subscribe channel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChannelInput"
+      responses:
+        "201":
+          description: Created channel
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForceChannel"
+  /admin/channels/{id}:
+    patch:
+      operationId: updateChannel
+      tags: [channels]
+      summary: Update a force subscribe channel
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChannelUpdate"
+      responses:
+        "200":
+          description: Updated channel
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForceChannel"
+    delete:
+      operationId: deleteChannel
+      tags: [channels]
+      summary: Delete a force subscribe channel
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Deleted
+  /admin/milestones:
+    get:
+      operationId: listMilestones
+      tags: [milestones]
+      summary: List reward milestones
+      responses:
+        "200":
+          description: Milestones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Milestone"
+    post:
+      operationId: createMilestone
+      tags: [milestones]
+      summary: Create a reward milestone
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MilestoneInput"
+      responses:
+        "201":
+          description: Created milestone
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Milestone"
+  /admin/milestones/{id}:
+    patch:
+      operationId: updateMilestone
+      tags: [milestones]
+      summary: Update a reward milestone
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MilestoneUpdate"
+      responses:
+        "200":
+          description: Updated milestone
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Milestone"
+    delete:
+      operationId: deleteMilestone
+      tags: [milestones]
+      summary: Delete a reward milestone
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Deleted
+  /admin/rewards:
+    get:
+      operationId: listRewards
+      tags: [rewards]
+      summary: List reward inventory
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [available, assigned, delivered, failed, all]
+      responses:
+        "200":
+          description: Rewards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reward"
+    post:
+      operationId: createReward
+      tags: [rewards]
+      summary: Add a reward to inventory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RewardInput"
+      responses:
+        "201":
+          description: Created reward
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reward"
+  /admin/rewards/{id}:
+    patch:
+      operationId: updateReward
+      tags: [rewards]
+      summary: Edit a reward
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RewardUpdate"
+      responses:
+        "200":
+          description: Updated reward
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reward"
+    delete:
+      operationId: deleteReward
+      tags: [rewards]
+      summary: Remove an unassigned reward
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Deleted
+  /admin/rewards/stock:
+    get:
+      operationId: getRewardStock
+      tags: [rewards]
+      summary: Get reward stock grouped by milestone
+      responses:
+        "200":
+          description: Stock summary
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockSummary"
+  /admin/rewards/deliveries:
+    get:
+      operationId: listDeliveries
+      tags: [rewards]
+      summary: List reward delivery history
+      responses:
+        "200":
+          description: Delivery history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Delivery"
+  /admin/users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: Search and list users
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      responses:
+        "200":
+          description: Users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+  /admin/users/{telegramId}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get user profile and history
+      parameters:
+        - $ref: "#/components/parameters/TelegramId"
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+  /admin/users/{telegramId}/actions:
+    post:
+      operationId: applyUserAction
+      tags: [users]
+      summary: Apply a logged manual user action
+      parameters:
+        - $ref: "#/components/parameters/TelegramId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserAction"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /admin/broadcasts:
+    get:
+      operationId: listBroadcasts
+      tags: [broadcasts]
+      summary: List broadcast jobs
+      responses:
+        "200":
+          description: Broadcasts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Broadcast"
+    post:
+      operationId: createBroadcast
+      tags: [broadcasts]
+      summary: Queue a broadcast
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BroadcastInput"
+      responses:
+        "201":
+          description: Queued broadcast
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Broadcast"
+  /admin/audit-logs:
+    get:
+      operationId: listAuditLogs
+      tags: [audit]
+      summary: List admin audit logs
+      responses:
+        "200":
+          description: Audit logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditLog"
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    TelegramId:
+      name: telegramId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string }
+    Dashboard:
+      type: object
+      required: [metrics, activity]
+      properties:
+        metrics:
+          type: object
+          required: [totalUsers, verifiedUsers, successfulReferrals, rewardsDelivered, availableRewards, usedRewards, failedDeliveries]
+          properties:
+            totalUsers: { type: integer }
+            verifiedUsers: { type: integer }
+            successfulReferrals: { type: integer }
+            rewardsDelivered: { type: integer }
+            availableRewards: { type: integer }
+            usedRewards: { type: integer }
+            failedDeliveries: { type: integer }
+        activity:
+          type: array
+          items:
+            $ref: "#/components/schemas/Activity"
+    Activity:
+      type: object
+      required: [id, label, detail, createdAt]
+      properties:
+        id: { type: integer }
+        label: { type: string }
+        detail: { type: string }
+        createdAt: { type: string, format: date-time }
+        tone: { type: string, enum: [blue, green, amber, red] }
+    BotSettings:
+      type: object
+      required: [maintenanceMode, referralSystemEnabled, disclaimerEnabled, supportBotLink, supportButtonLabel, ownerTelegramId]
+      properties:
+        maintenanceMode: { type: boolean }
+        maintenanceMessage: { type: string }
+        referralSystemEnabled: { type: boolean }
+        disclaimerEnabled: { type: boolean }
+        supportBotLink: { type: string }
+        supportButtonLabel: { type: string }
+        ownerTelegramId: { type: integer, format: int64 }
+        botUsername: { type: ["string", "null"] }
+    SettingsUpdate:
+      type: object
+      properties:
+        maintenanceMode: { type: boolean }
+        maintenanceMessage: { type: string }
+        referralSystemEnabled: { type: boolean }
+        disclaimerEnabled: { type: boolean }
+        supportBotLink: { type: string }
+        supportButtonLabel: { type: string }
+    BotContent:
+      type: object
+      required: [welcomeMessage, maintenanceMessage, disclaimer, forceSubscribeMessage, supportMessage, howItWorksMessage, rewardMessage, successMessage, errorMessage]
+      properties:
+        welcomeMessage: { type: string }
+        maintenanceMessage: { type: string }
+        disclaimer: { type: string }
+        forceSubscribeMessage: { type: string }
+        supportMessage: { type: string }
+        howItWorksMessage: { type: string }
+        rewardMessage: { type: string }
+        successMessage: { type: string }
+        errorMessage: { type: string }
+    ContentUpdate:
+      type: object
+      properties:
+        welcomeMessage: { type: string }
+        maintenanceMessage: { type: string }
+        disclaimer: { type: string }
+        forceSubscribeMessage: { type: string }
+        supportMessage: { type: string }
+        howItWorksMessage: { type: string }
+        rewardMessage: { type: string }
+        successMessage: { type: string }
+        errorMessage: { type: string }
+    ForceChannel:
+      type: object
+      required: [id, title, chatId, inviteLink, enabled, sortOrder]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        chatId: { type: string }
+        inviteLink: { type: string }
+        enabled: { type: boolean }
+        sortOrder: { type: integer }
+        memberCount: { type: integer }
+    ChannelInput:
+      type: object
+      required: [title, chatId, inviteLink]
+      properties:
+        title: { type: string, minLength: 1 }
+        chatId: { type: string, minLength: 1 }
+        inviteLink: { type: string, format: uri }
+        enabled: { type: boolean }
+        sortOrder: { type: integer }
+    ChannelUpdate:
+      type: object
+      properties:
+        title: { type: string }
+        chatId: { type: string }
+        inviteLink: { type: string, format: uri }
+        enabled: { type: boolean }
+        sortOrder: { type: integer }
+    Milestone:
+      type: object
+      required: [id, name, referralTarget, enabled, rewardCount, claimedCount]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        referralTarget: { type: integer, minimum: 1 }
+        enabled: { type: boolean }
+        rewardCount: { type: integer }
+        claimedCount: { type: integer }
+    MilestoneInput:
+      type: object
+      required: [name, referralTarget]
+      properties:
+        name: { type: string, minLength: 1 }
+        referralTarget: { type: integer, minimum: 1 }
+        enabled: { type: boolean }
+    MilestoneUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        referralTarget: { type: integer, minimum: 1 }
+        enabled: { type: boolean }
+    Reward:
+      type: object
+      required: [id, milestoneId, type, label, status, createdAt]
+      properties:
+        id: { type: integer }
+        milestoneId: { type: integer }
+        type: { type: string, enum: [text, link, code, json, file, photo, video, animation, document, apk, media] }
+        label: { type: string }
+        payload: { type: string }
+        filePath: { type: ["string", "null"] }
+        status: { type: string, enum: [available, assigned, delivered, failed, disabled] }
+        assignedTo: { type: ["integer", "null"], format: int64 }
+        createdAt: { type: string, format: date-time }
+    RewardInput:
+      type: object
+      required: [milestoneId, type, label, payload]
+      properties:
+        milestoneId: { type: integer }
+        type: { type: string, enum: [text, link, code, json, file, photo, video, animation, document, apk, media] }
+        label: { type: string }
+        payload: { type: string }
+        filePath: { type: string }
+        enabled: { type: boolean }
+    RewardUpdate:
+      type: object
+      properties:
+        label: { type: string }
+        payload: { type: string }
+        enabled: { type: boolean }
+    StockSummary:
+      type: object
+      required: [milestoneId, milestoneName, target, available, assigned, delivered, failed]
+      properties:
+        milestoneId: { type: integer }
+        milestoneName: { type: string }
+        target: { type: integer }
+        available: { type: integer }
+        assigned: { type: integer }
+        delivered: { type: integer }
+        failed: { type: integer }
+    Delivery:
+      type: object
+      required: [id, rewardId, milestoneId, telegramUserId, status, createdAt]
+      properties:
+        id: { type: integer }
+        rewardId: { type: integer }
+        milestoneId: { type: integer }
+        telegramUserId: { type: integer, format: int64 }
+        status: { type: string, enum: [assigned, delivered, failed] }
+        errorMessage: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+    User:
+      type: object
+      required: [telegramId, username, joinDate, referralCount, points, referralStatus, disclaimerAccepted, banned]
+      properties:
+        telegramId: { type: integer, format: int64 }
+        username: { type: string }
+        joinDate: { type: string, format: date-time }
+        referralCount: { type: integer }
+        points: { type: integer }
+        referralStatus: { type: string, enum: [pending, subscribed, disclaimer_accepted, completed] }
+        disclaimerAccepted: { type: boolean }
+        banned: { type: boolean }
+    UserProfile:
+      type: object
+      required: [user, referralHistory, rewardHistory]
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        referralHistory:
+          type: array
+          items:
+            $ref: "#/components/schemas/Referral"
+        rewardHistory:
+          type: array
+          items:
+            $ref: "#/components/schemas/Delivery"
+    Referral:
+      type: object
+      required: [id, referredTelegramId, status, createdAt]
+      properties:
+        id: { type: integer }
+        referredTelegramId: { type: integer, format: int64 }
+        status: { type: string, enum: [pending, subscribed, disclaimer_accepted, completed, invalid] }
+        createdAt: { type: string, format: date-time }
+    UserAction:
+      type: object
+      required: [action]
+      properties:
+        action: { type: string, enum: [ban, unban, add_referrals, remove_referrals, add_points, remove_points, reset_progress] }
+        amount: { type: integer, minimum: 1 }
+        reason: { type: string }
+    Broadcast:
+      type: object
+      required: [id, contentType, content, status, totalRecipients, sentCount, failedCount, createdAt]
+      properties:
+        id: { type: integer }
+        contentType: { type: string, enum: [text, photo, video, animation, document] }
+        content: { type: string }
+        status: { type: string, enum: [draft, queued, processing, completed, failed] }
+        totalRecipients: { type: integer }
+        sentCount: { type: integer }
+        failedCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+    BroadcastInput:
+      type: object
+      required: [contentType, content]
+      properties:
+        contentType: { type: string, enum: [text, photo, video, animation, document] }
+        content: { type: string }
+        buttonText: { type: string }
+        buttonUrl: { type: string, format: uri }
+        preview: { type: boolean }
+    AuditLog:
+      type: object
+      required: [id, action, actorTelegramId, createdAt]
+      properties:
+        id: { type: integer }
+        action: { type: string }
+        actorTelegramId: { type: integer, format: int64 }
+        targetTelegramId: { type: ["integer", "null"], format: int64 }
+        detail: { type: string }
+        createdAt: { type: string, format: date-time }
