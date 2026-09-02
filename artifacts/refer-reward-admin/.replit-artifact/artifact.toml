@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Refer Reward Control"
+description = "A premium admin control center for a Telegram refer-and-reward bot, with campaign management, secure reward inventory, force-subscribe settings, content editing, broadcasts, user operations, and audit visibility."
+version = "1.0.0"
+id = "artifacts/refer-reward-admin"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20200
+
+[services.development]
+run = "pnpm --filter @workspace/refer-reward-admin run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/refer-reward-admin", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/refer-reward-admin/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20200"
+BASE_PATH = "/"
